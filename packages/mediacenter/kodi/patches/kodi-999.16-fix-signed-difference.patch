@@ -1,0 +1,20 @@
+--- kodi-enhance-filecache-performance/xbmc/filesystem/FileCache.cpp.old	2022-01-27 12:21:38.011196836 +0100
++++ kodi-enhance-filecache-performance/xbmc/filesystem/FileCache.cpp	2022-01-27 12:20:35.506474675 +0100
+@@ -377,7 +377,7 @@
+     // over network file systems will hopefully increase throughput.
+     // Special case: m_chunkSize == 1 (non-buffered file) fits
+     // right into this calculation.
+-    int64_t maxSourceRead = std::min(maxWrite, m_slowStartReadSize);
++    int64_t maxSourceRead = std::min(static_cast<ssize_t>(maxWrite), m_slowStartReadSize);
+ 
+     // Allow a non-m_chunkSize read if only the last chunk remains,
+     // otherwise we won't read to the end.
+@@ -404,7 +404,7 @@
+     // to read more than what is available, treat that as an early warning
+     // for underrun and log some diagnostic data.
+     // Also log during slow start.
+-    if (avail * 4 < m_writeRate || avail < maxSourceRead || m_slowStartReadSize < buffer.size())
++    if (avail * 4 < m_writeRate || avail < maxSourceRead || static_cast<size_t>(m_slowStartReadSize) < buffer.size())
+       CLog::Log(LOGDEBUG,
+                 "CFileCache::{} Reading {} bytes from source. maxWrite: {}, avail: {}, writeRate: {}, slowStartReadSize: {}",
+                 __FUNCTION__, maxSourceRead, maxWrite, avail, m_writeRate, m_slowStartReadSize);
